@@ -65,6 +65,12 @@ def index():
     """الصفحة الرئيسية"""
     return render_template('index.html')
 
+@app.route('/test.html')
+def test_page():
+    """صفحة اختبار الأزرار"""
+    with open('test.html', 'r', encoding='utf-8') as f:
+        return f.read()
+
 @app.route('/api/data')
 def get_data():
     """إرجاع جميع البيانات"""
