@@ -1,281 +1,99 @@
-// Global variables
+// ComptaPro - Simple and Clean JavaScript
+console.log('🚀 ComptaPro تم تحميله');
+
+// Global data
 let appData = {
     customers: [],
     products: [],
     invoices: []
 };
 
-// Initialize the application
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 ComptaPro تم تحميله بنجاح');
-
-    // Check if Bootstrap is loaded
-    if (typeof bootstrap === 'undefined') {
-        console.error('❌ Bootstrap غير محمل!');
-        alert('خطأ: Bootstrap غير محمل. يرجى التحقق من الاتصال بالإنترنت.');
-        return;
-    }
-
+    console.log('✅ الصفحة جاهزة');
     loadData();
-    setupEventListeners();
-
-    // Make functions globally available for onclick handlers
-    window.showAddCustomerModal = showAddCustomerModal;
-    window.addCustomer = addCustomer;
-    window.deleteCustomer = deleteCustomer;
-    window.showCreateInvoiceModal = showCreateInvoiceModal;
-    window.generateRandomInvoice = generateRandomInvoice;
-    window.saveNewCustomer = saveNewCustomer;
-    window.cancelNewCustomer = cancelNewCustomer;
-    window.addInvoiceItem = addInvoiceItem;
-    window.removeInvoiceItem = removeInvoiceItem;
-    window.createInvoice = createInvoice;
-    window.showAddProductModal = showAddProductModal;
-
-    console.log('✅ جميع الدوال متاحة عالمياً');
-    console.log('✅ Bootstrap محمل:', typeof bootstrap !== 'undefined');
-
-    // Add backup event listeners for buttons in case onclick fails
-    setTimeout(function() {
-        addBackupEventListeners();
-    }, 1000);
+    setupTabs();
 });
 
-// Add backup event listeners for all buttons
-function addBackupEventListeners() {
-    console.log('🔧 إضافة معالجات أحداث احتياطية...');
+// === BUTTON FUNCTIONS (Simple and Direct) ===
 
-    // Dashboard buttons
-    const createInvoiceButtons = document.querySelectorAll('button[onclick*="showCreateInvoiceModal"]');
-    createInvoiceButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            console.log('🔘 زر إنشاء فاتورة تم النقر عليه');
-            showCreateInvoiceModal();
-        });
-    });
-
-    const randomInvoiceButtons = document.querySelectorAll('button[onclick*="generateRandomInvoice"]');
-    randomInvoiceButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            console.log('🔘 زر الفاتورة التلقائية تم النقر عليه');
-            generateRandomInvoice();
-        });
-    });
-
-    // Customer buttons
-    const addCustomerButtons = document.querySelectorAll('button[onclick*="showAddCustomerModal"]');
-    addCustomerButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            console.log('🔘 زر إضافة عميل تم النقر عليه');
-            showAddCustomerModal();
-        });
-    });
-
-    // Modal form buttons
-    const saveCustomerButtons = document.querySelectorAll('button[onclick*="addCustomer"]');
-    saveCustomerButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            console.log('🔘 زر حفظ عميل تم النقر عليه');
-            addCustomer();
-        });
-    });
-
-    console.log('✅ تم إضافة معالجات الأحداث الاحتياطية');
-}
-
-// Setup event listeners
-function setupEventListeners() {
-    // Tab change events
-    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function(e) {
-            const target = e.target.getAttribute('data-bs-target');
-            if (target === '#customers') {
-                renderCustomersTable();
-            } else if (target === '#products') {
-                renderProductsTable();
-            } else if (target === '#invoices') {
-                renderInvoicesTable();
-            }
-        });
-    });
-
-    // Invoice customer selection
-    const invoiceCustomerSelect = document.getElementById('invoiceCustomer');
-    if (invoiceCustomerSelect) {
-        invoiceCustomerSelect.addEventListener('change', function() {
-            const newCustomerForm = document.getElementById('newCustomerForm');
-            if (this.value === 'new') {
-                newCustomerForm.style.display = 'block';
-                document.getElementById('newCustomerName').focus();
-            } else {
-                newCustomerForm.style.display = 'none';
-            }
-        });
-    }
-
-    // Invoice items calculation
-    document.addEventListener('change', function(e) {
-        if (e.target.classList.contains('item-product') || 
-            e.target.classList.contains('item-quantity')) {
-            updateInvoiceCalculations();
-        }
-    });
-
-    // Enter key for new customer form
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && document.getElementById('newCustomerForm').style.display === 'block') {
-            e.preventDefault();
-            saveNewCustomer();
-        }
-        if (e.key === 'Escape' && document.getElementById('newCustomerForm').style.display === 'block') {
-            cancelNewCustomer();
-        }
-    });
-
-    // Add click event listeners for buttons that might not work with onclick
-    document.addEventListener('click', function(e) {
-        // Dashboard buttons
-        if (e.target.closest('button[onclick*="showCreateInvoiceModal"]')) {
-            e.preventDefault();
-            showCreateInvoiceModal();
-        }
-        if (e.target.closest('button[onclick*="generateRandomInvoice"]')) {
-            e.preventDefault();
-            generateRandomInvoice();
-        }
-
-        // Customer management buttons
-        if (e.target.closest('button[onclick*="showAddCustomerModal"]')) {
-            e.preventDefault();
-            showAddCustomerModal();
-        }
-        if (e.target.closest('button[onclick*="addCustomer"]')) {
-            e.preventDefault();
-            addCustomer();
-        }
-
-        // Product management buttons
-        if (e.target.closest('button[onclick*="showAddProductModal"]')) {
-            e.preventDefault();
-            showAddProductModal();
-        }
-
-        // Invoice form buttons
-        if (e.target.closest('button[onclick*="saveNewCustomer"]')) {
-            e.preventDefault();
-            saveNewCustomer();
-        }
-        if (e.target.closest('button[onclick*="cancelNewCustomer"]')) {
-            e.preventDefault();
-            cancelNewCustomer();
-        }
-        if (e.target.closest('button[onclick*="addInvoiceItem"]')) {
-            e.preventDefault();
-            addInvoiceItem();
-        }
-        if (e.target.closest('button[onclick*="createInvoice"]')) {
-            e.preventDefault();
-            createInvoice();
-        }
-
-        // Delete buttons
-        if (e.target.closest('button[onclick*="deleteCustomer"]')) {
-            e.preventDefault();
-            const button = e.target.closest('button');
-            const customerId = button.getAttribute('onclick').match(/'([^']+)'/)[1];
-            deleteCustomer(customerId);
-        }
-
-        // Remove invoice item buttons
-        if (e.target.closest('button[onclick*="removeInvoiceItem"]')) {
-            e.preventDefault();
-            const button = e.target.closest('button');
-            removeInvoiceItem(button);
-        }
-    });
-}
-
-// Load data from server
-async function loadData() {
-    try {
-        showLoading(true);
-        const response = await fetch('/api/data');
-        if (response.ok) {
-            appData = await response.json();
-            updateDashboard();
-            populateCustomerSelects();
-            populateProductSelects();
-            console.log('✅ تم تحميل البيانات بنجاح');
-        } else {
-            throw new Error('فشل في تحميل البيانات');
-        }
-    } catch (error) {
-        console.error('❌ خطأ في تحميل البيانات:', error);
-        showToast('خطأ في تحميل البيانات', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// Update dashboard statistics
-function updateDashboard() {
-    document.getElementById('customersCount').textContent = appData.customers.length;
-    document.getElementById('productsCount').textContent = appData.products.length;
-    document.getElementById('invoicesCount').textContent = appData.invoices.length;
-}
-
-// Show/hide loading spinner
-function showLoading(show) {
-    const loading = document.querySelector('.loading');
-    if (loading) {
-        loading.style.display = show ? 'block' : 'none';
-    }
-}
-
-// Show toast notification
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    const toastBody = document.getElementById('toastBody');
-    
-    toastBody.textContent = message;
-    toast.className = `toast ${type === 'error' ? 'bg-danger text-white' : 'bg-success text-white'}`;
-    
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-}
-
-// Customer functions
 function showAddCustomerModal() {
-    console.log('🔘 فتح نموذج إضافة عميل');
+    console.log('🔘 فتح نموذج العميل');
     const modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
     modal.show();
     document.getElementById('customerName').focus();
 }
 
+function showCreateInvoiceModal() {
+    console.log('🔘 فتح نموذج الفاتورة');
+    const modal = new bootstrap.Modal(document.getElementById('createInvoiceModal'));
+    populateCustomerSelects();
+    populateProductSelects();
+    modal.show();
+}
+
+function generateRandomInvoice() {
+    console.log('🔘 إنشاء فاتورة تلقائية');
+    
+    if (appData.customers.length === 0) {
+        alert('يرجى إضافة عميل واحد على الأقل');
+        return;
+    }
+    
+    if (appData.products.length === 0) {
+        alert('يرجى إضافة منتج واحد على الأقل');
+        return;
+    }
+    
+    // Generate random invoice
+    const randomCustomer = appData.customers[Math.floor(Math.random() * appData.customers.length)];
+    const randomProduct = appData.products[Math.floor(Math.random() * appData.products.length)];
+    
+    const targetTotal = 4000 + Math.random() * 1000;
+    const quantity = Math.ceil(targetTotal / (randomProduct.price * 1.20));
+    const subtotal = randomProduct.price * quantity;
+    const tax = subtotal * 0.20;
+    const total = subtotal + tax;
+    
+    const invoiceData = {
+        customer_id: randomCustomer.id,
+        items: [{
+            product_id: randomProduct.id,
+            product_name: randomProduct.name,
+            quantity: quantity,
+            price: randomProduct.price,
+            total: subtotal
+        }],
+        subtotal: subtotal,
+        tax: tax,
+        total: total
+    };
+    
+    createInvoiceAPI(invoiceData);
+}
+
 async function addCustomer() {
+    console.log('🔘 حفظ عميل');
+    
     const name = document.getElementById('customerName').value.trim();
     const ice = document.getElementById('customerICE').value.trim();
     const phone = document.getElementById('customerPhone').value.trim();
     const address = document.getElementById('customerAddress').value.trim();
 
     if (!name) {
-        showToast('اسم العميل مطلوب', 'error');
+        alert('اسم العميل مطلوب');
         return;
     }
 
-    // Validate ICE if provided
     if (ice && (ice.length !== 15 || !/^\d+$/.test(ice))) {
-        showToast('رقم ICE يجب أن يكون 15 رقماً', 'error');
+        alert('رقم ICE يجب أن يكون 15 رقماً');
         return;
     }
 
     try {
-        showLoading(true);
         const response = await fetch('/api/customers', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, ice, phone, address })
         });
 
@@ -291,29 +109,25 @@ async function addCustomer() {
             bootstrap.Modal.getInstance(document.getElementById('addCustomerModal')).hide();
             document.getElementById('addCustomerForm').reset();
             
-            showToast('تم إضافة العميل بنجاح');
+            alert('تم إضافة العميل بنجاح');
         } else {
-            showToast(result.error || 'فشل في إضافة العميل', 'error');
+            alert(result.error || 'فشل في إضافة العميل');
         }
     } catch (error) {
-        console.error('خطأ في إضافة العميل:', error);
-        showToast('خطأ في الاتصال بالخادم', 'error');
-    } finally {
-        showLoading(false);
+        console.error('خطأ:', error);
+        alert('خطأ في الاتصال بالخادم');
     }
 }
 
 async function deleteCustomer(customerId) {
+    console.log('🔘 حذف عميل:', customerId);
+    
     if (!confirm('هل أنت متأكد من حذف هذا العميل؟')) {
         return;
     }
 
     try {
-        showLoading(true);
-        const response = await fetch(`/api/customers/${customerId}`, {
-            method: 'DELETE'
-        });
-
+        const response = await fetch(`/api/customers/${customerId}`, { method: 'DELETE' });
         const result = await response.json();
         
         if (response.ok && result.success) {
@@ -321,65 +135,78 @@ async function deleteCustomer(customerId) {
             updateDashboard();
             populateCustomerSelects();
             renderCustomersTable();
-            showToast('تم حذف العميل بنجاح');
+            alert('تم حذف العميل بنجاح');
         } else {
-            showToast(result.error || 'فشل في حذف العميل', 'error');
+            alert(result.error || 'فشل في حذف العميل');
         }
     } catch (error) {
-        console.error('خطأ في حذف العميل:', error);
-        showToast('خطأ في الاتصال بالخادم', 'error');
-    } finally {
-        showLoading(false);
+        console.error('خطأ:', error);
+        alert('خطأ في الاتصال بالخادم');
     }
 }
 
-// Render customers table
-function renderCustomersTable() {
-    const tbody = document.getElementById('customersTableBody');
-    if (!tbody) return;
+function showAddProductModal() {
+    alert('ميزة إضافة المنتجات قيد التطوير');
+}
 
-    tbody.innerHTML = '';
-    
-    appData.customers.forEach(customer => {
-        const row = document.createElement('tr');
-        row.className = 'fade-in';
-        row.innerHTML = `
-            <td>${customer.name}</td>
-            <td>${customer.ice || '-'}</td>
-            <td>${customer.phone || '-'}</td>
-            <td>${customer.address || '-'}</td>
-            <td>
-                <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${customer.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(row);
+// === HELPER FUNCTIONS ===
+
+async function loadData() {
+    try {
+        const response = await fetch('/api/data');
+        if (response.ok) {
+            appData = await response.json();
+            updateDashboard();
+            populateCustomerSelects();
+            populateProductSelects();
+            console.log('✅ تم تحميل البيانات');
+        }
+    } catch (error) {
+        console.error('خطأ في تحميل البيانات:', error);
+    }
+}
+
+function updateDashboard() {
+    document.getElementById('customersCount').textContent = appData.customers.length;
+    document.getElementById('productsCount').textContent = appData.products.length;
+    document.getElementById('invoicesCount').textContent = appData.invoices.length;
+}
+
+function setupTabs() {
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+            const target = e.target.getAttribute('data-bs-target');
+            if (target === '#customers') {
+                renderCustomersTable();
+            } else if (target === '#products') {
+                renderProductsTable();
+            } else if (target === '#invoices') {
+                renderInvoicesTable();
+            }
+        });
     });
 }
 
-// Populate customer select dropdowns
 function populateCustomerSelects() {
     const selects = document.querySelectorAll('#invoiceCustomer');
     selects.forEach(select => {
-        // Keep the first two options (empty and "new")
-        const options = Array.from(select.options);
-        const staticOptions = options.slice(0, 2);
+        const currentValue = select.value;
+        select.innerHTML = `
+            <option value="">اختر العميل...</option>
+            <option value="new">+ إضافة عميل جديد</option>
+        `;
         
-        select.innerHTML = '';
-        staticOptions.forEach(option => select.appendChild(option));
-        
-        // Add customer options
         appData.customers.forEach(customer => {
             const option = document.createElement('option');
             option.value = customer.id;
             option.textContent = customer.name;
             select.appendChild(option);
         });
+        
+        select.value = currentValue;
     });
 }
 
-// Populate product select dropdowns
 function populateProductSelects() {
     const selects = document.querySelectorAll('.item-product');
     selects.forEach(select => {
@@ -398,7 +225,55 @@ function populateProductSelects() {
     });
 }
 
-// Products table (placeholder)
+async function createInvoiceAPI(invoiceData) {
+    try {
+        const response = await fetch('/api/invoices', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(invoiceData)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            appData.invoices.push(result.invoice);
+            updateDashboard();
+            renderInvoicesTable();
+            alert(`تم إنشاء فاتورة بقيمة ${invoiceData.total.toFixed(2)} درهم`);
+        } else {
+            alert(result.error || 'فشل في إنشاء الفاتورة');
+        }
+    } catch (error) {
+        console.error('خطأ:', error);
+        alert('خطأ في الاتصال بالخادم');
+    }
+}
+
+// === RENDER FUNCTIONS ===
+
+function renderCustomersTable() {
+    const tbody = document.getElementById('customersTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    
+    appData.customers.forEach(customer => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${customer.name}</td>
+            <td>${customer.ice || '-'}</td>
+            <td>${customer.phone || '-'}</td>
+            <td>${customer.address || '-'}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${customer.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
 function renderProductsTable() {
     const tbody = document.getElementById('productsTableBody');
     if (!tbody) return;
@@ -407,7 +282,6 @@ function renderProductsTable() {
     
     appData.products.forEach(product => {
         const row = document.createElement('tr');
-        row.className = 'fade-in';
         row.innerHTML = `
             <td>${product.name}</td>
             <td>${product.price} درهم</td>
@@ -422,7 +296,6 @@ function renderProductsTable() {
     });
 }
 
-// Invoices table (placeholder)
 function renderInvoicesTable() {
     const tbody = document.getElementById('invoicesTableBody');
     if (!tbody) return;
@@ -434,7 +307,6 @@ function renderInvoicesTable() {
         const date = new Date(invoice.date).toLocaleDateString('ar-MA');
         
         const row = document.createElement('tr');
-        row.className = 'fade-in';
         row.innerHTML = `
             <td>${invoice.number}</td>
             <td>${date}</td>
@@ -453,328 +325,4 @@ function renderInvoicesTable() {
     });
 }
 
-// Invoice functions
-function showCreateInvoiceModal() {
-    console.log('🔘 فتح نموذج إنشاء فاتورة');
-    const modal = new bootstrap.Modal(document.getElementById('createInvoiceModal'));
-    populateCustomerSelects();
-    populateProductSelects();
-    modal.show();
-}
-
-async function saveNewCustomer() {
-    const name = document.getElementById('newCustomerName').value.trim();
-    const ice = document.getElementById('newCustomerICE').value.trim();
-    const phone = document.getElementById('newCustomerPhone').value.trim();
-    const address = document.getElementById('newCustomerAddress').value.trim();
-
-    if (!name) {
-        showToast('اسم العميل مطلوب', 'error');
-        document.getElementById('newCustomerName').focus();
-        return;
-    }
-
-    // Validate ICE if provided
-    if (ice && (ice.length !== 15 || !/^\d+$/.test(ice))) {
-        showToast('رقم ICE يجب أن يكون 15 رقماً', 'error');
-        document.getElementById('newCustomerICE').focus();
-        return;
-    }
-
-    try {
-        showLoading(true);
-        const response = await fetch('/api/customers', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name, ice, phone, address })
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            appData.customers.push(result.customer);
-            updateDashboard();
-            populateCustomerSelects();
-
-            // Select the new customer and hide the form
-            document.getElementById('invoiceCustomer').value = result.customer.id;
-            cancelNewCustomer();
-
-            showToast('تم إضافة العميل بنجاح');
-        } else {
-            showToast(result.error || 'فشل في إضافة العميل', 'error');
-        }
-    } catch (error) {
-        console.error('خطأ في إضافة العميل:', error);
-        showToast('خطأ في الاتصال بالخادم', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-function cancelNewCustomer() {
-    document.getElementById('newCustomerForm').style.display = 'none';
-    document.getElementById('invoiceCustomer').value = '';
-
-    // Clear form
-    document.getElementById('newCustomerName').value = '';
-    document.getElementById('newCustomerICE').value = '';
-    document.getElementById('newCustomerPhone').value = '';
-    document.getElementById('newCustomerAddress').value = '';
-}
-
-function addInvoiceItem() {
-    const container = document.getElementById('invoiceItems');
-    const newItem = document.createElement('div');
-    newItem.className = 'invoice-item row mb-2';
-    newItem.innerHTML = `
-        <div class="col-md-6">
-            <select class="form-control item-product">
-                <option value="">اختر المنتج...</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <input type="number" class="form-control item-quantity" placeholder="الكمية" min="1" value="1">
-        </div>
-        <div class="col-md-2">
-            <input type="number" class="form-control item-price" placeholder="السعر" step="0.01" readonly>
-        </div>
-        <div class="col-md-2">
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeInvoiceItem(this)">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-    `;
-
-    container.appendChild(newItem);
-    populateProductSelects();
-}
-
-function removeInvoiceItem(button) {
-    const item = button.closest('.invoice-item');
-    item.remove();
-    updateInvoiceCalculations();
-}
-
-function updateInvoiceCalculations() {
-    let subtotal = 0;
-
-    document.querySelectorAll('.invoice-item').forEach(item => {
-        const productSelect = item.querySelector('.item-product');
-        const quantityInput = item.querySelector('.item-quantity');
-        const priceInput = item.querySelector('.item-price');
-
-        if (productSelect.value) {
-            const selectedOption = productSelect.selectedOptions[0];
-            const price = parseFloat(selectedOption.dataset.price || 0);
-            const quantity = parseInt(quantityInput.value || 0);
-
-            priceInput.value = price.toFixed(2);
-            subtotal += price * quantity;
-        } else {
-            priceInput.value = '';
-        }
-    });
-
-    const tax = subtotal * 0.20; // 20% VAT
-    const total = subtotal + tax;
-
-    document.getElementById('invoiceSubtotal').textContent = `${subtotal.toFixed(2)} درهم`;
-    document.getElementById('invoiceTax').textContent = `${tax.toFixed(2)} درهم`;
-    document.getElementById('invoiceTotal').textContent = `${total.toFixed(2)} درهم`;
-}
-
-async function createInvoice() {
-    const customerId = document.getElementById('invoiceCustomer').value;
-
-    if (!customerId || customerId === 'new') {
-        showToast('يرجى اختيار العميل', 'error');
-        return;
-    }
-
-    // Collect invoice items
-    const items = [];
-    let hasValidItems = false;
-
-    document.querySelectorAll('.invoice-item').forEach(item => {
-        const productSelect = item.querySelector('.item-product');
-        const quantityInput = item.querySelector('.item-quantity');
-
-        if (productSelect.value && quantityInput.value) {
-            const selectedOption = productSelect.selectedOptions[0];
-            const product = appData.products.find(p => p.id === productSelect.value);
-
-            if (product) {
-                items.push({
-                    product_id: product.id,
-                    product_name: product.name,
-                    quantity: parseInt(quantityInput.value),
-                    price: product.price,
-                    total: product.price * parseInt(quantityInput.value)
-                });
-                hasValidItems = true;
-            }
-        }
-    });
-
-    if (!hasValidItems) {
-        showToast('يرجى إضافة عنصر واحد على الأقل للفاتورة', 'error');
-        return;
-    }
-
-    const subtotal = items.reduce((sum, item) => sum + item.total, 0);
-    const tax = subtotal * 0.20;
-    const total = subtotal + tax;
-
-    try {
-        showLoading(true);
-        const response = await fetch('/api/invoices', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                customer_id: customerId,
-                items: items,
-                subtotal: subtotal,
-                tax: tax,
-                total: total
-            })
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            appData.invoices.push(result.invoice);
-            updateDashboard();
-            renderInvoicesTable();
-
-            // Close modal and reset form
-            bootstrap.Modal.getInstance(document.getElementById('createInvoiceModal')).hide();
-            document.getElementById('createInvoiceForm').reset();
-            document.getElementById('invoiceItems').innerHTML = `
-                <div class="invoice-item row mb-2">
-                    <div class="col-md-6">
-                        <select class="form-control item-product">
-                            <option value="">اختر المنتج...</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" class="form-control item-quantity" placeholder="الكمية" min="1" value="1">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" class="form-control item-price" placeholder="السعر" step="0.01" readonly>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-danger btn-sm" onclick="removeInvoiceItem(this)">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-            updateInvoiceCalculations();
-
-            showToast('تم إنشاء الفاتورة بنجاح');
-        } else {
-            showToast(result.error || 'فشل في إنشاء الفاتورة', 'error');
-        }
-    } catch (error) {
-        console.error('خطأ في إنشاء الفاتورة:', error);
-        showToast('خطأ في الاتصال بالخادم', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-async function generateRandomInvoice() {
-    console.log('🔘 إنشاء فاتورة تلقائية');
-    if (appData.customers.length === 0) {
-        showToast('يرجى إضافة عميل واحد على الأقل', 'error');
-        return;
-    }
-
-    if (appData.products.length === 0) {
-        showToast('يرجى إضافة منتج واحد على الأقل', 'error');
-        return;
-    }
-
-    // Generate random invoice between 4000-5000 DH
-    const targetTotal = 4000 + Math.random() * 1000;
-    const targetSubtotal = targetTotal / 1.20; // Remove 20% tax
-
-    const randomCustomer = appData.customers[Math.floor(Math.random() * appData.customers.length)];
-    const randomProduct = appData.products[Math.floor(Math.random() * appData.products.length)];
-
-    const quantity = Math.ceil(targetSubtotal / randomProduct.price);
-    const subtotal = randomProduct.price * quantity;
-    const tax = subtotal * 0.20;
-    const total = subtotal + tax;
-
-    const items = [{
-        product_id: randomProduct.id,
-        product_name: randomProduct.name,
-        quantity: quantity,
-        price: randomProduct.price,
-        total: subtotal
-    }];
-
-    try {
-        showLoading(true);
-        const response = await fetch('/api/invoices', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                customer_id: randomCustomer.id,
-                items: items,
-                subtotal: subtotal,
-                tax: tax,
-                total: total
-            })
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            appData.invoices.push(result.invoice);
-            updateDashboard();
-            renderInvoicesTable();
-            showToast(`تم إنشاء فاتورة تلقائية بقيمة ${total.toFixed(2)} درهم`);
-        } else {
-            showToast(result.error || 'فشل في إنشاء الفاتورة التلقائية', 'error');
-        }
-    } catch (error) {
-        console.error('خطأ في إنشاء الفاتورة التلقائية:', error);
-        showToast('خطأ في الاتصال بالخادم', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// Placeholder functions
-function showAddProductModal() {
-    console.log('🔘 محاولة فتح نموذج إضافة منتج');
-    showToast('ميزة إضافة المنتجات قيد التطوير', 'error');
-}
-
-// Test function to verify buttons work
-function testButtons() {
-    console.log('🧪 اختبار الأزرار...');
-    console.log('✅ showAddCustomerModal:', typeof showAddCustomerModal);
-    console.log('✅ showCreateInvoiceModal:', typeof showCreateInvoiceModal);
-    console.log('✅ generateRandomInvoice:', typeof generateRandomInvoice);
-    console.log('✅ addCustomer:', typeof addCustomer);
-    console.log('✅ Bootstrap:', typeof bootstrap);
-
-    // Test if we can access DOM elements
-    console.log('✅ addCustomerModal:', document.getElementById('addCustomerModal') ? 'موجود' : 'غير موجود');
-    console.log('✅ createInvoiceModal:', document.getElementById('createInvoiceModal') ? 'موجود' : 'غير موجود');
-
-    return 'جميع الاختبارات مكتملة - تحقق من وحدة التحكم';
-}
-
-// Make test function available globally
-window.testButtons = testButtons;
+console.log('✅ جميع الدوال جاهزة');
