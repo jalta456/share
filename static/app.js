@@ -8,9 +8,80 @@ let appData = {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 ComptaPro تم تحميله بنجاح');
+
+    // Check if Bootstrap is loaded
+    if (typeof bootstrap === 'undefined') {
+        console.error('❌ Bootstrap غير محمل!');
+        alert('خطأ: Bootstrap غير محمل. يرجى التحقق من الاتصال بالإنترنت.');
+        return;
+    }
+
     loadData();
     setupEventListeners();
+
+    // Make functions globally available for onclick handlers
+    window.showAddCustomerModal = showAddCustomerModal;
+    window.addCustomer = addCustomer;
+    window.deleteCustomer = deleteCustomer;
+    window.showCreateInvoiceModal = showCreateInvoiceModal;
+    window.generateRandomInvoice = generateRandomInvoice;
+    window.saveNewCustomer = saveNewCustomer;
+    window.cancelNewCustomer = cancelNewCustomer;
+    window.addInvoiceItem = addInvoiceItem;
+    window.removeInvoiceItem = removeInvoiceItem;
+    window.createInvoice = createInvoice;
+    window.showAddProductModal = showAddProductModal;
+
+    console.log('✅ جميع الدوال متاحة عالمياً');
+    console.log('✅ Bootstrap محمل:', typeof bootstrap !== 'undefined');
+
+    // Add backup event listeners for buttons in case onclick fails
+    setTimeout(function() {
+        addBackupEventListeners();
+    }, 1000);
 });
+
+// Add backup event listeners for all buttons
+function addBackupEventListeners() {
+    console.log('🔧 إضافة معالجات أحداث احتياطية...');
+
+    // Dashboard buttons
+    const createInvoiceButtons = document.querySelectorAll('button[onclick*="showCreateInvoiceModal"]');
+    createInvoiceButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            console.log('🔘 زر إنشاء فاتورة تم النقر عليه');
+            showCreateInvoiceModal();
+        });
+    });
+
+    const randomInvoiceButtons = document.querySelectorAll('button[onclick*="generateRandomInvoice"]');
+    randomInvoiceButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            console.log('🔘 زر الفاتورة التلقائية تم النقر عليه');
+            generateRandomInvoice();
+        });
+    });
+
+    // Customer buttons
+    const addCustomerButtons = document.querySelectorAll('button[onclick*="showAddCustomerModal"]');
+    addCustomerButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            console.log('🔘 زر إضافة عميل تم النقر عليه');
+            showAddCustomerModal();
+        });
+    });
+
+    // Modal form buttons
+    const saveCustomerButtons = document.querySelectorAll('button[onclick*="addCustomer"]');
+    saveCustomerButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            console.log('🔘 زر حفظ عميل تم النقر عليه');
+            addCustomer();
+        });
+    });
+
+    console.log('✅ تم إضافة معالجات الأحداث الاحتياطية');
+}
 
 // Setup event listeners
 function setupEventListeners() {
@@ -58,6 +129,68 @@ function setupEventListeners() {
         }
         if (e.key === 'Escape' && document.getElementById('newCustomerForm').style.display === 'block') {
             cancelNewCustomer();
+        }
+    });
+
+    // Add click event listeners for buttons that might not work with onclick
+    document.addEventListener('click', function(e) {
+        // Dashboard buttons
+        if (e.target.closest('button[onclick*="showCreateInvoiceModal"]')) {
+            e.preventDefault();
+            showCreateInvoiceModal();
+        }
+        if (e.target.closest('button[onclick*="generateRandomInvoice"]')) {
+            e.preventDefault();
+            generateRandomInvoice();
+        }
+
+        // Customer management buttons
+        if (e.target.closest('button[onclick*="showAddCustomerModal"]')) {
+            e.preventDefault();
+            showAddCustomerModal();
+        }
+        if (e.target.closest('button[onclick*="addCustomer"]')) {
+            e.preventDefault();
+            addCustomer();
+        }
+
+        // Product management buttons
+        if (e.target.closest('button[onclick*="showAddProductModal"]')) {
+            e.preventDefault();
+            showAddProductModal();
+        }
+
+        // Invoice form buttons
+        if (e.target.closest('button[onclick*="saveNewCustomer"]')) {
+            e.preventDefault();
+            saveNewCustomer();
+        }
+        if (e.target.closest('button[onclick*="cancelNewCustomer"]')) {
+            e.preventDefault();
+            cancelNewCustomer();
+        }
+        if (e.target.closest('button[onclick*="addInvoiceItem"]')) {
+            e.preventDefault();
+            addInvoiceItem();
+        }
+        if (e.target.closest('button[onclick*="createInvoice"]')) {
+            e.preventDefault();
+            createInvoice();
+        }
+
+        // Delete buttons
+        if (e.target.closest('button[onclick*="deleteCustomer"]')) {
+            e.preventDefault();
+            const button = e.target.closest('button');
+            const customerId = button.getAttribute('onclick').match(/'([^']+)'/)[1];
+            deleteCustomer(customerId);
+        }
+
+        // Remove invoice item buttons
+        if (e.target.closest('button[onclick*="removeInvoiceItem"]')) {
+            e.preventDefault();
+            const button = e.target.closest('button');
+            removeInvoiceItem(button);
         }
     });
 }
@@ -113,6 +246,7 @@ function showToast(message, type = 'success') {
 
 // Customer functions
 function showAddCustomerModal() {
+    console.log('🔘 فتح نموذج إضافة عميل');
     const modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
     modal.show();
     document.getElementById('customerName').focus();
@@ -321,6 +455,7 @@ function renderInvoicesTable() {
 
 // Invoice functions
 function showCreateInvoiceModal() {
+    console.log('🔘 فتح نموذج إنشاء فاتورة');
     const modal = new bootstrap.Modal(document.getElementById('createInvoiceModal'));
     populateCustomerSelects();
     populateProductSelects();
@@ -554,6 +689,7 @@ async function createInvoice() {
 }
 
 async function generateRandomInvoice() {
+    console.log('🔘 إنشاء فاتورة تلقائية');
     if (appData.customers.length === 0) {
         showToast('يرجى إضافة عميل واحد على الأقل', 'error');
         return;
@@ -620,5 +756,25 @@ async function generateRandomInvoice() {
 
 // Placeholder functions
 function showAddProductModal() {
+    console.log('🔘 محاولة فتح نموذج إضافة منتج');
     showToast('ميزة إضافة المنتجات قيد التطوير', 'error');
 }
+
+// Test function to verify buttons work
+function testButtons() {
+    console.log('🧪 اختبار الأزرار...');
+    console.log('✅ showAddCustomerModal:', typeof showAddCustomerModal);
+    console.log('✅ showCreateInvoiceModal:', typeof showCreateInvoiceModal);
+    console.log('✅ generateRandomInvoice:', typeof generateRandomInvoice);
+    console.log('✅ addCustomer:', typeof addCustomer);
+    console.log('✅ Bootstrap:', typeof bootstrap);
+
+    // Test if we can access DOM elements
+    console.log('✅ addCustomerModal:', document.getElementById('addCustomerModal') ? 'موجود' : 'غير موجود');
+    console.log('✅ createInvoiceModal:', document.getElementById('createInvoiceModal') ? 'موجود' : 'غير موجود');
+
+    return 'جميع الاختبارات مكتملة - تحقق من وحدة التحكم';
+}
+
+// Make test function available globally
+window.testButtons = testButtons;
