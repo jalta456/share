@@ -1,0 +1,15 @@
+[Unit]
+Description=ComptaPro Flask Application
+After=network.target
+
+[Service]
+Type=simple
+User=augment-agent
+WorkingDirectory=/mnt/persist/workspace
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/python3 app.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
