@@ -301,11 +301,11 @@ function renderInvoicesTable() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    
+
     appData.invoices.forEach(invoice => {
         const customer = appData.customers.find(c => c.id === invoice.customer_id);
         const date = new Date(invoice.date).toLocaleDateString('ar-MA');
-        
+
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${invoice.number}</td>
@@ -313,16 +313,203 @@ function renderInvoicesTable() {
             <td>${customer ? customer.name : 'غير محدد'}</td>
             <td>${invoice.total.toFixed(2)} درهم</td>
             <td>
-                <button class="btn btn-primary btn-sm me-1">
+                <button class="btn btn-primary btn-sm me-1" onclick="viewInvoice('${invoice.id}')">
                     <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn btn-danger btn-sm">
+                <button class="btn btn-danger btn-sm" onclick="deleteInvoice('${invoice.id}')">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
         `;
         tbody.appendChild(row);
     });
+}
+
+// Invoice viewing and printing functions
+function viewInvoice(invoiceId) {
+    console.log('🔘 عرض فاتورة:', invoiceId);
+
+    const invoice = appData.invoices.find(inv => inv.id === invoiceId);
+    if (!invoice) {
+        alert('الفاتورة غير موجودة');
+        return;
+    }
+
+    const customer = appData.customers.find(c => c.id === invoice.customer_id);
+    const date = new Date(invoice.date).toLocaleDateString('ar-MA');
+
+    const invoiceHTML = `
+        <div class="invoice-header">
+            <h2>🧾 ComptaPro</h2>
+            <h4>فاتورة رقم: ${invoice.number}</h4>
+            <p>التاريخ: ${date}</p>
+        </div>
+
+        <div class="invoice-info">
+            <div>
+                <h5>معلومات العميل:</h5>
+                <p><strong>الاسم:</strong> ${customer ? customer.name : 'غير محدد'}</p>
+                <p><strong>رقم ICE:</strong> ${customer && customer.ice ? customer.ice : '-'}</p>
+                <p><strong>الهاتف:</strong> ${customer && customer.phone ? customer.phone : '-'}</p>
+                <p><strong>العنوان:</strong> ${customer && customer.address ? customer.address : '-'}</p>
+            </div>
+            <div>
+                <h5>معلومات الفاتورة:</h5>
+                <p><strong>رقم الفاتورة:</strong> ${invoice.number}</p>
+                <p><strong>التاريخ:</strong> ${date}</p>
+                <p><strong>الحالة:</strong> مدفوعة</p>
+            </div>
+        </div>
+
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>المنتج/الخدمة</th>
+                    <th>الكمية</th>
+                    <th>السعر الوحدة</th>
+                    <th>المجموع</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${invoice.items.map(item => `
+                    <tr>
+                        <td>${item.product_name}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.price.toFixed(2)} درهم</td>
+                        <td>${item.total.toFixed(2)} درهم</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+
+        <div class="invoice-total">
+            <table>
+                <tr>
+                    <td>المجموع الفرعي:</td>
+                    <td>${invoice.subtotal.toFixed(2)} درهم</td>
+                </tr>
+                <tr>
+                    <td>الضريبة (20%):</td>
+                    <td>${invoice.tax.toFixed(2)} درهم</td>
+                </tr>
+                <tr class="total-row">
+                    <td><strong>المجموع الإجمالي:</strong></td>
+                    <td><strong>${invoice.total.toFixed(2)} درهم</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <p>شكراً لتعاملكم معنا</p>
+            <p>ComptaPro - نظام إدارة الفواتير</p>
+        </div>
+    `;
+
+    document.getElementById('invoiceContent').innerHTML = invoiceHTML;
+
+    const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
+    modal.show();
+}
+
+function printInvoice() {
+    console.log('🔘 طباعة فاتورة');
+    window.print();
+}
+
+function copyInvoice() {
+    console.log('🔘 نسخ فاتورة');
+
+    const invoiceContent = document.getElementById('invoiceContent');
+    const textContent = invoiceContent.innerText;
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(textContent).then(() => {
+            alert('تم نسخ الفاتورة إلى الحافظة');
+        }).catch(() => {
+            fallbackCopyTextToClipboard(textContent);
+        });
+    } else {
+        fallbackCopyTextToClipboard(textContent);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        document.execCommand('copy');
+        alert('تم نسخ الفاتورة إلى الحافظة');
+    } catch (err) {
+        alert('فشل في نسخ الفاتورة');
+    }
+
+    document.body.removeChild(textArea);
+}
+
+function downloadInvoice() {
+    console.log('🔘 تحميل فاتورة PDF');
+
+    // Create a new window for PDF generation
+    const printWindow = window.open('', '_blank');
+    const invoiceContent = document.getElementById('invoiceContent').innerHTML;
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>فاتورة - ComptaPro</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .invoice-content { max-width: 800px; margin: 0 auto; }
+                .invoice-header { text-align: center; border-bottom: 2px solid #4facfe; padding-bottom: 20px; margin-bottom: 30px; }
+                .invoice-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
+                .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                .invoice-table th, .invoice-table td { border: 1px solid #ddd; padding: 12px; text-align: right; }
+                .invoice-table th { background: #f8f9fa; font-weight: bold; }
+                .invoice-total { text-align: left; margin-top: 20px; }
+                .invoice-total table { margin-right: auto; width: 300px; }
+                .invoice-total td { padding: 8px 15px; border: 1px solid #ddd; }
+                .total-row { background: #4facfe; color: white; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="invoice-content">
+                ${invoiceContent}
+            </div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                    setTimeout(function() { window.close(); }, 1000);
+                }
+            </script>
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+}
+
+async function deleteInvoice(invoiceId) {
+    console.log('🔘 حذف فاتورة:', invoiceId);
+
+    if (!confirm('هل أنت متأكد من حذف هذه الفاتورة؟')) {
+        return;
+    }
+
+    // For now, just remove from local data (you can add API call later)
+    appData.invoices = appData.invoices.filter(inv => inv.id !== invoiceId);
+    updateDashboard();
+    renderInvoicesTable();
+    alert('تم حذف الفاتورة بنجاح');
 }
 
 console.log('✅ جميع الدوال جاهزة');

@@ -71,6 +71,12 @@ def test_page():
     with open('test.html', 'r', encoding='utf-8') as f:
         return f.read()
 
+@app.route('/invoice_test.html')
+def invoice_test_page():
+    """صفحة اختبار عرض الفواتير"""
+    with open('invoice_test.html', 'r', encoding='utf-8') as f:
+        return f.read()
+
 @app.route('/api/data')
 def get_data():
     """إرجاع جميع البيانات"""
