@@ -193,28 +193,6 @@ def create_invoice():
         return jsonify({'error': f'خطأ في الخادم: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    import sys
-    import signal
-    import atexit
-
-    def signal_handler(sig, frame):
-        print('\n🛑 تم إيقاف ComptaPro')
-        sys.exit(0)
-
-    def cleanup():
-        print('🧹 تنظيف الموارد...')
-
-    # Register signal handlers
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    atexit.register(cleanup)
-
-    print("🚀 بدء تشغيل ComptaPro...")
-    print("📊 الوصول للتطبيق: http://localhost:5000")
-    print("📝 للإيقاف: Ctrl+C أو ./stop.sh")
-
-    try:
-        app.run(debug=False, host='0.0.0.0', port=5000, threaded=True)
-    except Exception as e:
-        print(f"❌ خطأ في تشغيل التطبيق: {e}")
-        sys.exit(1)
+    print("🚀 ComptaPro يعمل الآن...")
+    print("🌐 http://localhost:5000")
+    app.run(debug=True, host='0.0.0.0', port=5000)
