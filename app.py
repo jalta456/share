@@ -65,6 +65,18 @@ def index():
     """الصفحة الرئيسية"""
     return render_template('index.html')
 
+@app.route('/test.html')
+def test_page():
+    """صفحة اختبار الأزرار"""
+    with open('test.html', 'r', encoding='utf-8') as f:
+        return f.read()
+
+@app.route('/invoice_test.html')
+def invoice_test_page():
+    """صفحة اختبار عرض الفواتير"""
+    with open('invoice_test.html', 'r', encoding='utf-8') as f:
+        return f.read()
+
 @app.route('/api/data')
 def get_data():
     """إرجاع جميع البيانات"""
@@ -187,6 +199,6 @@ def create_invoice():
         return jsonify({'error': f'خطأ في الخادم: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    print("🚀 بدء تشغيل ComptaPro...")
-    print("📊 الوصول للتطبيق: http://localhost:5000")
+    print("🚀 ComptaPro يعمل الآن...")
+    print("🌐 http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)

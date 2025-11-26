@@ -145,6 +145,89 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Invoice Styles */
+        .invoice-content {
+            background: white;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .invoice-header {
+            text-align: center;
+            border-bottom: 2px solid #4facfe;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .invoice-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .invoice-table th,
+        .invoice-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: right;
+        }
+
+        .invoice-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .invoice-total {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .invoice-total table {
+            margin-right: auto;
+            width: 300px;
+        }
+
+        .invoice-total td {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+        }
+
+        .invoice-total .total-row {
+            background: #4facfe;
+            color: white;
+            font-weight: bold;
+        }
+
+        @media print {
+            .modal-header,
+            .modal-footer {
+                display: none !important;
+            }
+
+            .modal-dialog {
+                max-width: 100% !important;
+                margin: 0 !important;
+            }
+
+            .modal-content {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .invoice-content {
+                border: none !important;
+                padding: 0 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -461,6 +544,35 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
                     <button type="button" class="btn btn-primary" onclick="createInvoice()">إنشاء الفاتورة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice View Modal -->
+    <div class="modal fade" id="viewInvoiceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">عرض الفاتورة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="invoiceContent" class="invoice-content">
+                        <!-- محتوى الفاتورة سيتم ملؤه بـ JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-primary" onclick="printInvoice()">
+                        <i class="fas fa-print me-2"></i>طباعة
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="copyInvoice()">
+                        <i class="fas fa-copy me-2"></i>نسخ
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="downloadInvoice()">
+                        <i class="fas fa-download me-2"></i>تحميل PDF
+                    </button>
                 </div>
             </div>
         </div>
